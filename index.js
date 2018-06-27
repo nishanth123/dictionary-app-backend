@@ -16,12 +16,13 @@ app.use(cors(corsOptions));
 
 var server = http.createServer((function(request,response)
 {
-  console.log('test-1');
-
   response.writeHead(200,
   {"Content-Type" : "text/plain"});
   
-      axios.get(`https://od-api.oxforddictionaries.com/api/v1/entries/en/stubborn`, 
+      var url = request.url.toString(); 
+      url = "https://od-api.oxforddictionaries.com/api/v1/entries/en" + url;
+      
+      axios.get(url, 
       { 
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -40,24 +41,24 @@ var server = http.createServer((function(request,response)
         var obj = result.lexicalEntries[0].entries[0].senses[0];
 
         var examples = [];
-        examples[0] = obj.examples[0].text;
-        examples[1] = obj.examples[1].text;
+        try {
+          var arrayLength = obj.examples.length;
+          
+          for (var i = 0; i < arrayLength; i++ ) {
+            examples[i] = obj.examples[i].text;
+          }
+        } catch (err) {
+
+        }
 
         var output = { name: result.id, meaning: obj.definitions[0], examples: examples };
-        console.log('test-2');
         response.data = output;
-        console.log(response.data);
-        console.log('test-5')
         response.write(JSON.stringify(output));
-        response.end("The Oxford-Dictionary API has been invoked \n");      
+        response.end("");      
       })
       .catch(function (error) {
         console.log(error);
       });
-
-  console.log('test-3');
-  console.log(response.data);
-  //response.write(response.data);
   
 }));
 
